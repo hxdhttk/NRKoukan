@@ -31,11 +31,12 @@ type IdolType = Cu | Co | Pa
             | "PA" | "PASSION" -> Pa
             | _ -> failwith "Unknown idol type"
 
-type Card = {
-    IdolName: string
-    IdolType: IdolType
-    Rarity: Rarity
-}
+type Card = 
+    {
+        IdolName: string
+        IdolType: IdolType
+        Rarity: Rarity
+    }
     with
         member this.ToStr() =
             sprintf "%s %s %s" (this.IdolName) (this.IdolType.ToStr()) (this.Rarity.ToStr())
@@ -79,9 +80,8 @@ type Db = Db of Set<Card>
             let (Db data) = this
             printCards data
 
-
-
 type Op =
+    | Show
     | Add of Card
     | SearchByName of string
     | SearchByIdolType of IdolType
@@ -89,6 +89,8 @@ type Op =
 
 let parseOps (cmd: array<string>) =
     match cmd with
+    | [| "show" |] ->
+        Show
     | [| "add"; arg1; arg2; arg3 |] ->
         let cardLine = String.concat " " [| arg1; arg2; arg3 |]
         Add (Card.Parse cardLine)
@@ -121,6 +123,8 @@ let searchByRarity (rarity: Rarity) (Db data) =
 let main argv =
     let db = Db.Read()
     match parseOps argv with
+    | Show ->
+        db.Print()
     | Add card ->
         let newDb = add card db
         newDb.Save()
